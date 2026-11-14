@@ -38,7 +38,7 @@ st.markdown(f"""
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap');
 html, body, .stApp, [data-testid="stMarkdownContainer"], button, input, label {{ font-family: Inter, Arial, sans-serif; }}
 .stApp {{ background: {PAPER}; }}
-.block-container {{ padding-top: 2.2rem; max-width: 1240px; }}
+.block-container {{ padding-top: 4.5rem; max-width: 1240px; }}
 [data-testid="stSidebar"] {{ background: {NAVY}; }}
 [data-testid="stSidebar"] * {{ color: #CFE0EA; }}
 [data-testid="stSidebarNav"] a {{ border-radius: 10px; }}
@@ -90,11 +90,12 @@ h1.page-title {{ font-family: 'DM Serif Display', Georgia, serif !important; fon
 .result .num {{ text-align: right; flex: none; }}
 .result .num .big {{ font-family: 'DM Serif Display', Georgia, serif; font-size: 38px; line-height: 1; display: block; }}
 .result .num small {{ font-size: 13px; font-weight: 600; }}
-.bars .row {{ display: flex; align-items: center; gap: 14px; margin: 8px 0; font-size: 14px; color: {INK}; }}
-.bars .name {{ width: 180px; flex: none; }}
-.bars .track {{ flex: 1; height: 20px; background: #EEF3F6; border-radius: 6px; overflow: hidden; }}
+.bars .row {{ display: grid; grid-template-columns: minmax(110px, 0.9fr) minmax(90px, 1.6fr) auto; align-items: center;
+    column-gap: 14px; margin: 8px 0; font-size: 14px; color: {INK}; }}
+.bars .name {{ min-width: 0; }}
+.bars .track {{ height: 20px; background: #EEF3F6; border-radius: 6px; overflow: hidden; }}
 .bars .fill {{ height: 20px; border-radius: 6px; }}
-.bars .val {{ width: 120px; flex: none; font-weight: 700; }}
+.bars .val {{ font-weight: 700; white-space: nowrap; }}
 .driver {{ display: flex; gap: 16px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid {TINT}; }}
 .driver:last-child {{ border-bottom: none; }}
 .driver .rank {{ flex: none; width: 36px; height: 36px; border-radius: 18px; color: {PAPER}; font-weight: 800;
@@ -773,7 +774,8 @@ data-collection flags: {N:,} hospitals.</p></div>
 <p>• <b style="color:#F6F9FA">Missing factors:</b> no size, staffing, case mix; two survey composites were dropped by CMS.</p>
 <p>• <b style="color:#F6F9FA">Overlapping scores:</b> the communication measures move together, so they share credit.</p>
 <p>• <b style="color:#F6F9FA">The 70% line</b> is the national middle, not a clinical standard.</p></div>
-<div class="box tint"><h4>How AI helped</h4><p>We used AI assistants (ChatGPT and Claude) for coding, debugging, and merging our notebooks. Every number was produced by running our code on the real data and checked by the group.</p></div>""",
+<div class="box tint"><h4>How AI helped</h4><p>We used AI assistants (ChatGPT and Claude) for coding, debugging, merging our notebooks and
+plain-language explanations. Every number was produced by running our code on the real data and checked by the group.</p></div>""",
                     unsafe_allow_html=True)
 
 
