@@ -1,7 +1,7 @@
+**Predictive Analytics group project** 
+· Rebecca Quaye · Ketty Odero · Victoria Kutuusa
+
 # What Makes Patients Recommend a Hospital?
-
-**Predictive Analytics group project** · Rebecca Quaye · Ketty Odero · Victoria Kutuusa
-
 Every US hospital that treats Medicare patients surveys its discharged patients with the national HCAHPS survey. One question
 sums up the patient’s verdict: *would you recommend this hospital to your friends and family?* Across hospitals, the share who
 answer “definitely yes” ranges from 30% to 94%.
