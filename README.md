@@ -1,102 +1,83 @@
 # What Makes Patients Recommend a Hospital?
 
-**Predicting patient experience across 3,183 U.S. hospitals with regression, classification and clustering on 2024–25 CMS survey data.**
+**Predictive Analytics group project** · Rebecca Quaye · Ketty Odero · Victoria Kutuusa
 
->**Status:** in progress. Data cleaning is complete; modeling and the Streamlit app are under way.
+Every US hospital that treats Medicare patients surveys its discharged patients with the national HCAHPS survey. One question
+sums up the patient’s verdict: *would you recommend this hospital to your friends and family?* Across hospitals, the share who
+answer “definitely yes” ranges from 30% to 94%.
 
----
+This project finds which parts of a hospital stay are most linked to being recommended, predicts a hospital’s recommendation
+rate, flags hospitals likely to fall below the national middle (70%), and groups hospitals into peer tiers. It ends with an
+interactive Streamlit app.
 
-## Overview
+**Main question:** which patient-experience dimensions are most important in predicting patients’ willingness to recommend a hospital?
 
-Hospitals have limited budgets and can't fix everything at once. Patient-experience scores affect their Medicare payments (Medicare's Hospital Value-Based Purchasing program weights patient experience at 25%) and their public star ratings. Hospitals need to know **which improvements will raise patient recommendations the most**.
+## Key findings
 
-This project uses the CMS HCAHPS patient survey to find which parts of the hospital stay best predict whether patients would "definitely recommend" a hospital. It then turns those findings into priorities for each type of hospital.
-
-## Research questions
-
-**Descriptive**
-- **D1.** Which parts of the stay (e.g. nurse communication, quiet at night) get the lowest scores nationally?
-- **D2.** How do hospitals that most patients would recommend differ from the rest?
-- **D3.** Do scores differ by U.S. region and hospital size?
-
-**Predictive**
-- **P1.** Which parts of the stay best predict the % of patients who would definitely recommend a hospital?
-- **P2.** Can experience scores classify a hospital as high-recommendation (70%+)?
-- **P3.** Do hospitals fall into types with shared strengths and weaknesses, and what should each type fix first?
+- **Communication drives recommendation.** Nurse communication is the strongest driver of the recommendation rate; discharge
+  information is the strongest sign that a hospital clears 70%; doctor communication is close behind.
+- **Good hospitals are good at everything.** Hospitals fall into three quality tiers recommended at 78%, 70% and 61%.
+- **Predictions are useful for planning.** Linear regression predicts a hospital’s rate within about 5 points on average
+  (R² 0.56); the classifiers place about 3 in 4 hospitals on the right side of the 70% line.
 
 ## Data
 
-| | |
-|---|---|
-| **Source** | [CMS Provider Data Catalog: Patient survey (HCAHPS) – Hospital](https://data.cms.gov/provider-data/dataset/dgck-syfz) |
-| **Period** | Patients discharged Oct 2024 – Sep 2025 |
-| **Raw** | 325,720 rows (one row per hospital × survey answer), 4,790 hospitals |
-| **Cleaned** | 3,183 hospitals × 31 columns (one row per hospital, at least 100 completed surveys) |
+CMS Provider Data Catalog, *Patient survey (HCAHPS) – Hospital* (dataset dgck-syfz), patients discharged October 2024 to
+September 2025: https://data.cms.gov/provider-data/dataset/dgck-syfz. Public data, no NDA.
+The cleaned file `data/hcahps_model_ready.csv` has one row per hospital: 3,172 hospitals with at least 100 completed surveys
+and no CMS data-collection flags.
 
-The raw file (~105 MB) is larger than GitHub's 100 MB file limit, so it isn't stored in this repo. See [`data/raw/README.md`](data/raw/README.md) for how to download it.
+## Repository layout
 
-### Key variables
-
-| Variable | Description | Role |
-|---|---|---|
-| `recommend_pct` | % of patients who would "definitely" recommend the hospital | Continuous target |
-| `high_recommend` | 1 if `recommend_pct` ≥ 70 (the median), else 0 | Categorical target |
-| `nurse_comm`, `doctor_comm`, `medicine_comm`, `cleanliness`, `quietness`, `discharge_info` | % of patients answering "always" ("yes" for discharge info) | Predictors |
-| `region`, `large_sample`, `response_rate` | Census region; 1 if ≥ 300 surveys; survey response rate | Controls |
+```
+data/            hcahps_model_ready.csv (final dataset)
+notebooks/       HCAHPS_Group_Unified_Analysis.ipynb (EDA, PCA and clustering, regression, classification)
+reports/         written report and presentation material
+src/             [describe what is in this folder]
+app.py           Streamlit app
+train_models.py  trains the app’s models once and saves them to models/
+models/          hcahps_models.joblib (saved, already-trained models)
+.streamlit/      app theme (colours and sidebar)
+```
 
 ## Methods
 
-| Task | Methods | Evaluation |
-|---|---|---|
-| Unsupervised | PCA; k-means clustering on each hospital's relative strengths | Variance explained; elbow method and silhouette score |
-| Classification (`high_recommend`) | Logistic regression; classification tree | Accuracy, recall, confusion matrix, ROC AUC |
-| Regression (`recommend_pct`) | Multiple linear regression; regression tree | RMSE, adjusted R², VIF and residual checks |
+Six predictors (nurse communication, doctor communication, medicine explanation, discharge information, room cleanliness,
+night quietness). Every supervised model learns from 60% of hospitals and is scored on the 40% it never saw
+(`random_state=42`, stratified for classification), with settings tuned by 5-fold cross-validation on the training set only.
 
-All supervised models use a 70/30 train-test split with 5-fold cross-validation. Columns that restate the target (`recommend_linear`, `overall_rating_9_10`, `summary_star_rating`) are excluded to prevent data leakage.
+| Task | Models |
+|---|---|
+| Peer groups | PCA + k-means (3 tiers) |
+| Predict the recommendation % | Multiple linear regression, decision tree |
+| Flag hospitals below 70% | Logistic regression, classification tree, random forest |
 
-## Results
-
-_Coming soon._
-
-## Interactive app
-
-_Coming soon:_ a Streamlit app where hospital managers can enter their scores, see a predicted recommend rate, test "what-if" improvements and benchmark against similar hospitals.
-
-## Project structure
-
-```
-hospital-recommendation-drivers/
-├── data/
-│   ├── raw/              # raw CMS file (not committed; see data/raw/README.md)
-│   └── processed/        # cleaned, model-ready dataset
-├── notebooks/            # analysis notebooks, run in numbered order
-├── src/                  # reusable Python code (cleaning, features, models)
-├── models/               # saved trained models (.joblib)
-├── app/                  # Streamlit app
-├── reports/
-│   ├── figures/          # charts used in the README and report
-│   └── project_proposal.docx
-├── requirements.txt
-└── README.md
-```
-
-## How to run
+## Running the analysis
 
 ```bash
-git clone https://github.com/<your-username>/hospital-recommendation-drivers.git
-cd hospital-recommendation-drivers
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-jupyter lab                      # open the notebooks in notebooks/
+jupyter notebook notebooks/HCAHPS_Group_Unified_Analysis.ipynb
 ```
+
+## Running the app
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+The trained models are already saved in `models/`, so the app does not retrain while you present. Run
+`python train_models.py` only if the data changes.
+
+**Pages:** Overview · Explore the data · What drives recommendation · Peer tiers · Hospital predictor (the MVP) ·
+Test the models · How the models performed · Methods and limits.
 
 ## Limitations
 
-- **Association, not causation.** The predictors and the target come from the same patient survey.
-- **Small hospitals are excluded.** Hospitals with fewer than 100 surveys were dropped for reliability.
-- **Hospital-level data.** Results describe hospitals, not individual patients.
+Results show associations, not causes, from one year of hospital-level data. Hospitals with fewer than 100 surveys are
+excluded, and factors such as hospital size, staffing and patient mix are not in the data.
 
-## Author
+## Use of AI
 
-**[Ketty Odero]**: [LinkedIn](https://www.linkedin.com/in/kettyaldy/) · [Email](mailto:you@example.com)
+The group used AI assistants (ChatGPT and Claude) for coding, debugging, and merging notebooks.
+Every number was produced by running the code on the real data and checked by the group.
